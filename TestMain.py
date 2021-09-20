@@ -6,10 +6,10 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 if __name__ == '__main__':
-    book_dir = './data/book_test.parquet/'
-    trade_dir = './data/trade_test.parquet/'
-    target_file = './data/test.csv'
-    model = torch.load('./models/2021-09-19_11-55-28_0.24397.pkl').to('cuda')
+    book_dir = '../input/optiver-realized-volatility-prediction/book_test.parquet/'
+    trade_dir = '../input/optiver-realized-volatility-prediction/trade_test.parquet/'
+    target_file = '../input/optiver-realized-volatility-prediction/test.csv'
+    model = torch.load('/kaggle/working/2021-09-19_11-55-28_0.24397.pkl').to('cuda')
     model.eval()
     test_set = TestDataSet(book_dir, trade_dir, target_file)
     result = []
