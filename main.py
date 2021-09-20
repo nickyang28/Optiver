@@ -24,10 +24,6 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_set, batch_size=32, shuffle=True, collate_fn=padding)
     valid_loader = DataLoader(valid_set, batch_size=32, shuffle=True, collate_fn=padding)
 
-    # book_net = BookNet(8, 64, 64, 4).to('cuda')
-    # trade_net = TradeNet(3, 64, 64, 4).to('cuda')
-    # net = CombinedNet(book_net, trade_net).to('cuda')
-    # net = trade_net
     net = BookTradeNet(11, 64, 64, 4, 8, 0.1).to('cuda')
 
     """for name, param in net.named_parameters():
@@ -47,7 +43,6 @@ if __name__ == '__main__':
             trades = trades.float().cuda()
             optimizer.zero_grad()
             outputs = net(books, trades)
-            # outputs = net(trades)
             targets = torch.tensor(targets).reshape(outputs.shape).cuda()
             loss = criterion(outputs, targets)
             loss.backward()
@@ -58,32 +53,19 @@ if __name__ == '__main__':
                 print('[%d, %5d] Training Loss: %.6f' % (epoch + 1, step + 1, (running_loss / 1000)))
                 running_loss = 0.0
 
-            """if step % 1000 == 999:  # print every 100 steps
-                net.eval()
-                eval_loss = 0.0
-                batches = 0
-                for e_step, e_data in enumerate(tqdm(valid_loader, position=0, leave=True)):
-                    batches += 1
-                    books, trades, targets = e_data
-                    books = books.float().cuda()
-                    trades = trades.float().cuda()
-                    outputs = net(books, trades)
-                    targets = torch.tensor(targets).reshape(outputs.shape).cuda()
-                    loss = criterion(outputs, targets)
-                    eval_loss += loss.item()
-                print('[%d, %5d] Eval_Loss: %.6f' % (epoch + 1, step + 1, (eval_loss / batches)))"""
-        net.eval()
-        eval_loss = 0.0
-        batches = 0
-        for e_step, e_data in enumerate(tqdm(valid_loader, position=0, leave=True)):
-            batches += 1
-            books, trades, targets = e_data
-            books = books.float().cuda()
-            trades = trades.float().cuda()
-            outputs = net(books, trades)
-            targets = torch.tensor(targets).reshape(outputs.shape).cuda()
-            loss = criterion(outputs, targets)
-            eval_loss += loss.item()
+        with torch.no_grad():
+            net.eval()
+            eval_loss = 0.0
+            batches = 0
+            for e_step, e_data in enumerate(tqdm(valid_loader, position=0, leave=True)):
+                batches += 1
+                books, trades, targets = e_data
+                books = books.float().cuda()
+                trades = trades.float().cuda()
+                outputs = net(books, trades)
+                targets = torch.tensor(targets).reshape(outputs.shape).cuda()
+                loss = criterion(outputs, targets)
+                eval_loss += loss.item()
         print('[Epoch %d] Eval_Loss: %.6f' % (epoch + 1, (eval_loss / batches)))
         now = datetime.now()
         now = now.strftime("%Y-%m-%d_%H-%M-%S")
