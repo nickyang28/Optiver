@@ -9,7 +9,7 @@ if __name__ == '__main__':
     book_dir = '../input/optiver-realized-volatility-prediction/book_test.parquet/'
     trade_dir = '../input/optiver-realized-volatility-prediction/trade_test.parquet/'
     target_file = '../input/optiver-realized-volatility-prediction/test.csv'
-    model = torch.load('/kaggle/working/2021-09-19_11-55-28_0.24397.pkl').to('cuda')
+    model = torch.load('/kaggle/working/models/2021-09-19_11-55-28_0.24397.pkl').to('cuda')
     model.eval()
     test_set = TestDataSet(book_dir, trade_dir, target_file)
     result = []
