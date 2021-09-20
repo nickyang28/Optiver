@@ -4,7 +4,6 @@ import torch
 from StockDataSet import StockDataSet, padding
 from BookTradeNet import BookTradeNet
 import torch.optim as optim
-import torch.nn as nn
 from tqdm import tqdm
 from datetime import datetime
 

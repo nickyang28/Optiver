@@ -8,25 +8,25 @@ import numpy as np
 
 
 def padding(batch):
-    books = [_[0] for _ in batch]
-    books = pack_sequence(books, enforce_sorted=False)
+    _books = [_[0] for _ in batch]
+    _books = pack_sequence(_books, enforce_sorted=False)
     # books = pad_sequence(books, batch_first=True)
-    trades = [_[1] for _ in batch]
-    trades = pack_sequence(trades, enforce_sorted=False)
+    _trades = [_[1] for _ in batch]
+    _trades = pack_sequence(_trades, enforce_sorted=False)
     # trades = pad_sequence(trades, batch_first=True)
-    targets = [_[2] for _ in batch]
-    return books, trades, targets
+    return _books, _trades
 
 
 class TestDataSet(Dataset):
 
-    def __init__(self, _book_dir, _trade_dir):
+    def __init__(self, _book_dir, _trade_dir, _test_target):
         super(TestDataSet, self).__init__()
         self.book_dir = _book_dir
         self.trade_dir = _trade_dir
         self.data = {}
         self.books = {}
         self.trades = {}
+        self.target = pd.read_csv(_test_target)
 
         index = 0
         stock_list = sorted([int(_.split('=')[1]) for _ in os.listdir(self.book_dir)])
@@ -44,18 +44,20 @@ class TestDataSet(Dataset):
 
     def __getitem__(self, idx):
         stock_id, tick = self.data[idx]
-        book_train = self.books[stock_id]
-        trade_train = self.trades[stock_id]
+        trade_test = self.trades[stock_id]
+        book_test = self.books[stock_id]
 
-        book_data = ((book_train[book_train.time_id == tick].iloc[:, 2:] - [9.997256e-01, 1.000272e+00, 9.995367e-01,
+        trade_data = ((trade_test[trade_test.time_id == tick].iloc[:, 2:] - [9.999719e-01, 3.560419e+02,
+                                                                             4.173204e+00]) / [4.607074e-03,
+                                                                                               1.245112e+03,
+                                                                                               7.799558e+00]).values
+
+        book_data = ((book_test[book_test.time_id == tick].iloc[:, 2:] - [9.997256e-01, 1.000272e+00, 9.995367e-01,
                                                                             1.000460e+00, 9.264611e+02, 9.215677e+02,
                                                                             1.179289e+03, 1.143937e+03]) / [
                          3.811612e-03, 3.810952e-03, 3.822038e-03, 3.820868e-03, 5.769687e+03, 5.252489e+03,
                          7.155213e+03, 6.095076e+03]).values
-        trade_data = ((trade_train[trade_train.time_id == tick].iloc[:, 2:] - [9.999719e-01, 3.560419e+02,
-                                                                               4.173204e+00]) / [4.607074e-03,
-                                                                                                 1.245112e+03,
-                                                                                                 7.799558e+00]).values
+
         books_mean = book_data.mean(axis=0)
         trades_mean = trade_data.mean(axis=0)
         repeat_book_mean = np.vstack([books_mean] * len(trade_data))
@@ -69,5 +71,10 @@ class TestDataSet(Dataset):
 if __name__ == '__main__':
     book_dir = './data/book_test.parquet/'
     trade_dir = './data/trade_test.parquet/'
-    stocks = TestDataSet(book_dir, trade_dir)
+    target_file = './data/test.csv'
+    stocks = TestDataSet(book_dir, trade_dir, target_file)
     print(stocks[0])
+    for _ in range(len(stocks)):
+        keys = stocks.data[_]
+        books, trades = stocks[_]
+        row_id = stocks.target[(stocks.target.stock_id == keys[0]) & (stocks.target.time_id == keys[1])].row_id.values

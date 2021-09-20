@@ -8,14 +8,14 @@ import numpy as np
 
 
 def padding(batch):
-    books = [_[0] for _ in batch]
-    books = pack_sequence(books, enforce_sorted=False)
+    _books = [_[0] for _ in batch]
+    _books = pack_sequence(_books, enforce_sorted=False)
     # books = pad_sequence(books, batch_first=True)
-    trades = [_[1] for _ in batch]
-    trades = pack_sequence(trades, enforce_sorted=False)
+    _trades = [_[1] for _ in batch]
+    _trades = pack_sequence(_trades, enforce_sorted=False)
     # trades = pad_sequence(trades, batch_first=True)
-    targets = [_[2] for _ in batch]
-    return books, trades, targets
+    _targets = [_[2] for _ in batch]
+    return _books, _trades, _targets
 
 
 class StockDataSet(Dataset):

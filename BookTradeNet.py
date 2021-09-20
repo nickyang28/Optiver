@@ -12,7 +12,7 @@ class BookTradeNet(nn.Module):
         self.context_gate = nn.Sequential(
             nn.Linear(output_dim * 2, output_dim // 4),
             nn.ReLU(),
-            nn.BatchNorm1d(output_dim // 4),
+            # nn.BatchNorm1d(output_dim // 4),
             nn.Linear(output_dim // 4, output_dim * 2),
             nn.Sigmoid())
         self.fc0 = nn.Linear(output_dim * 2, output_dim * 2)

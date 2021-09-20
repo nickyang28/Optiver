@@ -17,8 +17,11 @@ class BaseModel(nn.Module):
         self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers=num_layers, bidirectional=True)
         self.fc = nn.Linear(hidden_dim * 2 * num_head, output_dim)
         self.dropout = nn.Dropout(dropout)
-        self.batch_norm = nn.BatchNorm1d(output_dim)
-        self.heads = [nn.Sequential(nn.LayerNorm(hidden_dim * 2), nn.Linear(hidden_dim * 2, hidden_dim * 4), nn.Dropout(0.2), nn.ReLU(), nn.Linear(hidden_dim * 4, 1)).to('cuda') for _ in range(num_head)]
+        # self.batch_norm = nn.BatchNorm1d(output_dim)
+        # self.heads = [nn.Sequential(nn.LayerNorm(hidden_dim * 2), nn.Linear(hidden_dim * 2, hidden_dim * 4), nn.Dropout(0.2), nn.ReLU(), nn.Linear(hidden_dim * 4, 1)).to('cuda') for _ in range(num_head)]
+        self.heads = [
+            nn.Sequential(nn.Linear(hidden_dim * 2, hidden_dim * 4),
+                          nn.ReLU(), nn.Linear(hidden_dim * 4, 1)).to('cuda') for _ in range(num_head)]
 
     def forward(self, x):
         x, mask = get_mask(x)
@@ -33,7 +36,7 @@ class BaseModel(nn.Module):
         x = torch.cat(att_li, -1)
         # x = self.dropout(x)
         x = self.fc(x)
-        x = self.batch_norm(x)
+        # x = self.batch_norm(x)
         return x
 
 
