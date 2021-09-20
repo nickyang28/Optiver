@@ -28,16 +28,14 @@ class TestDataSet(Dataset):
         self.trades = {}
         self.target = pd.read_csv(_test_target)
 
-        index = 0
-        stock_list = sorted([int(_.split('=')[1]) for _ in os.listdir(self.book_dir)])
-        for stock_id in stock_list:
+        for _ in range(len(self.target)):
+            self.data[_] = (self.target.iloc[_, 0], self.target.iloc[_, 1])
+
+        for stock_id in self.target.stock_id.unique():
             book_train = pd.read_parquet(self.book_dir + f'stock_id={stock_id}')
             trade_train = pd.read_parquet(self.trade_dir + f'stock_id={stock_id}')
             self.books[stock_id] = book_train
             self.trades[stock_id] = trade_train
-            for tick in trade_train.time_id.unique():
-                self.data[index] = (stock_id, tick)
-                index += 1
 
     def __len__(self):
         return len(self.data)
@@ -53,10 +51,15 @@ class TestDataSet(Dataset):
                                                                                                7.799558e+00]).values
 
         book_data = ((book_test[book_test.time_id == tick].iloc[:, 2:] - [9.997256e-01, 1.000272e+00, 9.995367e-01,
-                                                                            1.000460e+00, 9.264611e+02, 9.215677e+02,
-                                                                            1.179289e+03, 1.143937e+03]) / [
+                                                                          1.000460e+00, 9.264611e+02, 9.215677e+02,
+                                                                          1.179289e+03, 1.143937e+03]) / [
                          3.811612e-03, 3.810952e-03, 3.822038e-03, 3.820868e-03, 5.769687e+03, 5.252489e+03,
                          7.155213e+03, 6.095076e+03]).values
+
+        if not len(trade_data):
+            trade_data = np.array([[0, 0, 0]])
+        if not len(book_data):
+            book_data = np.array([[0, 0, 0, 0, 0, 0, 0, 0]])
 
         books_mean = book_data.mean(axis=0)
         trades_mean = trade_data.mean(axis=0)
@@ -73,7 +76,8 @@ if __name__ == '__main__':
     trade_dir = './data/trade_test.parquet/'
     target_file = './data/test.csv'
     stocks = TestDataSet(book_dir, trade_dir, target_file)
-    print(stocks[0])
+    print(stocks.data)
+    print(stocks[1])
     for _ in range(len(stocks)):
         keys = stocks.data[_]
         books, trades = stocks[_]
