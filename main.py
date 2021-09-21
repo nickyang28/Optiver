@@ -24,7 +24,8 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_set, batch_size=32, shuffle=True, collate_fn=padding)
     valid_loader = DataLoader(valid_set, batch_size=32, shuffle=True, collate_fn=padding)
 
-    net = BookTradeNet(11, 64, 64, 4, 8, 0.1).to('cuda')
+    # net = BookTradeNet(11, 64, 64, 4, 8, 0.1).to('cuda')
+    net = torch.load('./models/2021-09-20_12-06-54_0.232564.pkl').to('cuda')
 
     """for name, param in net.named_parameters():
         if name.startswith("weight"):
@@ -33,7 +34,7 @@ if __name__ == '__main__':
             nn.init.zeros_(param)"""
     # criterion = nn.MSELoss()
     criterion = RMSPELoss
-    optimizer = optim.Adam(net.parameters(), lr=0.001)
+    optimizer = optim.Adam(net.parameters(), lr=0.0005)
     for epoch in range(10):
         running_loss = 0.0
         for step, data in enumerate(tqdm(train_loader, position=0, leave=True)):
